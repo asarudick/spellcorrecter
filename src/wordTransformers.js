@@ -17,9 +17,6 @@ function createPrefixGenerator (transform) {
 		return toKey(prefix, suffix) in evaluated;
 	}
 
-	// Callbacks that are considered 'rules' to apply to each iteration.
-	const rules = Array.prototype.slice.call(arguments);
-
 	const gen = function* (value) {
 		const stack = [];
 
@@ -141,28 +138,66 @@ export function* eliminateRepeats (word) {
 }
 
 export function* vowelReplace (word) {
-	function* recurse (prefix, suffix) {
-		if (!suffix) {
-			yield prefix;
-			return;
-		}
 
-		const char = suffix[0];
-		suffix = suffix.substr(1);
+	// Prefix/suffix combination previously evaluated.
+	const evaluated = {};
 
-		const index = vowels.indexOf(char);
+	// Previously yielded prefix + suffix
+	const yielded = {};
 
-		yield* recurse(prefix + char, suffix);
-
-		if (index > -1) {
-			let movingIndex = index;
-			while ((movingIndex = (movingIndex + 1) % vowels.length) > -1 && movingIndex !== index) {
-				yield* recurse(prefix + vowels[movingIndex], suffix);
-			}
-		}
+	function wasEvaluated(prefix, suffix) {
+		return toKey(prefix, suffix) in evaluated;
 	}
 
-	const generator = recurse('', word);
+	const gen = function* (value) {
+		const stack = [];
+
+		stack.push([ '', value ]);
+
+		while (stack.length)
+		{
+			let [ prefix, suffix ] = stack.pop();
+
+			if (toKey(prefix, suffix) in evaluated) {
+				continue;
+			}
+
+			// Mark as evaluated to prevent duplicate recursion.
+			evaluated[toKey(prefix, suffix)] = true;
+
+			// If we haven't already produced this string(prefix + suffix),
+			// yield it, and mark as yielded.
+			if (!(prefix + suffix in yielded)) {
+				yielded[prefix + suffix] = true;
+				yield prefix + suffix;
+			}
+
+			// If we have no suffix this call, then we are done.
+			if (!suffix) {
+				continue;
+			}
+
+			const char = suffix[0];
+			suffix = suffix.substr(1);
+
+			if ( !wasEvaluated(prefix + char, suffix) ) {
+				stack.push([ prefix + char, suffix ]);
+			}
+
+			const index = vowels.indexOf(char);
+
+			if (index > -1) {
+				let movingIndex = index;
+				while ((movingIndex = (movingIndex + 1) % vowels.length) > -1 && movingIndex !== index) {
+					if ( !wasEvaluated(prefix + vowels[movingIndex], suffix) ) {
+						stack.push([ prefix + vowels[movingIndex], suffix ]);
+					}
+				}
+			}
+		}
+	};
+	
+	const generator = gen(word);
 
 	// The first result is the actual word itself, so we can skip.
 	generator.next();
