@@ -90,14 +90,15 @@ describe('vowelReplace', () => {
 	});
 });
 describe('addRepeats', () => {
+	const maximum = 3;
 	it('`a`', () => {
-		const transformer = addRepeats('a');
+		const transformer = addRepeats('a', maximum);
 		assert.equal(transformer.next().value, 'aa');
 		assert.equal(transformer.next().value, 'aaa');
 		assert.equal(transformer.next().value, undefined);
 	});
 	it('`ab`', () => {
-		const transformer = addRepeats('ab');
+		const transformer = addRepeats('ab', maximum);
 		assert.equal(transformer.next().value, 'aab');
 		assert.equal(transformer.next().value, 'abb');
 		assert.equal(transformer.next().value, 'aaab');
@@ -109,15 +110,15 @@ describe('addRepeats', () => {
 		assert.equal(transformer.next().value, undefined);
 	});
 	it('`aaa`', () => {
-		const transformer = addRepeats('aaa');
+		const transformer = addRepeats('aaa', maximum);
 		assert.equal(transformer.next().value, undefined);
 	});
 	it('`aaaa`', () => {
-		const transformer = addRepeats('aaaa');
+		const transformer = addRepeats('aaaa', maximum);
 		assert.equal(transformer.next().value, undefined);
 	});
 	it('``', () => {
-		const transformer = addRepeats('');
+		const transformer = addRepeats('', maximum);
 		assert.equal(transformer.next().value, undefined);
 	});
 });

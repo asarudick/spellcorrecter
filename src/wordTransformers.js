@@ -95,19 +95,23 @@ export function* lowercaseChars (word) {
 	yield* generator;
 }
 
-export function* addRepeats (word) {
+export function* addRepeats (word, maximum) {
+
+	function isFullyRepeated(prefix, suffix, char) {
+		const normalizedChar = char.toLowerCase();
+		const normalizedSuffix = suffix.toLowerCase();
+		const normalizedPrefix = prefix.toLowerCase();
+
+		const pattern = _.times(maximum, _.constant(normalizedChar)).join('');
+
+		const ends = normalizedPrefix.substr(-maximum) + normalizedChar + normalizedSuffix.substr(0, maximum - 1);
+
+		return ends.indexOf(pattern) > -1;
+	}
 
 	const generator = createPrefixGenerator(
 		(prefix, suffix, char) => {
-			const normalizedChar = char.toLowerCase();
-			const normalizedSuffix = suffix.toLowerCase();
-			const normalizedPrefix = prefix.toLowerCase();
-			const fullyRepeated = normalizedSuffix.length >= 2 && normalizedChar === normalizedSuffix[0] && normalizedChar === normalizedSuffix[1]
-						|| normalizedSuffix.length >= 1 && normalizedPrefix.length && normalizedPrefix[normalizedPrefix.length - 1] === normalizedChar && normalizedSuffix[0] === normalizedChar
-						|| normalizedPrefix.length >= 2 && normalizedPrefix[normalizedPrefix.length - 2] === normalizedChar && normalizedPrefix[normalizedPrefix.length - 1] === normalizedChar
-						|| normalizedPrefix.length >= 3 && normalizedPrefix[normalizedPrefix.length - 3] === normalizedChar && normalizedPrefix[normalizedPrefix.length - 2] === normalizedChar && normalizedPrefix[normalizedPrefix.length - 1] === normalizedChar;
-
-			if (!fullyRepeated)
+			if (!isFullyRepeated(prefix, suffix, char))
 			{
 				return [ prefix + char, char + suffix ];
 			}
@@ -147,7 +151,6 @@ export function* vowelReplace (word) {
 
 	function wasEvaluated(prefix, suffix) {
 		const result = toKey(prefix, suffix) in evaluated;
-		// console.log(`Produced ${prefix}, ${suffix}. Evaluated: ${result}`);
 		return result;
 	}
 
@@ -164,6 +167,7 @@ export function* vowelReplace (word) {
 		while (queue.length)
 		{
 			let [ prefix, suffix ] = queue.shift();
+
 			if (wasEvaluated(prefix, suffix)) {
 				continue;
 			}
