@@ -14,8 +14,8 @@ describe('lowercaseChars', () => {
 	it('`AA`', () => {
 		const transformer = lowercaseChars('AA');
 		assert.equal(transformer.next().value, 'aA');
-		assert.equal(transformer.next().value, 'aa');
 		assert.equal(transformer.next().value, 'Aa');
+		assert.equal(transformer.next().value, 'aa');
 		assert.equal(transformer.next().value, undefined);
 	});
 	it('``', () => {
@@ -32,8 +32,8 @@ describe('uppercaseChars', () => {
 	it('`aa`', () => {
 		const transformer = uppercaseChars('aa');
 		assert.equal(transformer.next().value, 'Aa');
-		assert.equal(transformer.next().value, 'AA');
 		assert.equal(transformer.next().value, 'aA');
+		assert.equal(transformer.next().value, 'AA');
 		assert.equal(transformer.next().value, undefined);
 	});
 	it('``', () => {
@@ -45,43 +45,43 @@ describe('uppercaseChars', () => {
 describe('vowelReplace', () => {
 	it('`a`', () => {
 		const transformer = vowelReplace('a');
-		assert.equal(transformer.next().value, 'y');
-		assert.equal(transformer.next().value, 'u');
-		assert.equal(transformer.next().value, 'o');
-		assert.equal(transformer.next().value, 'i');
 		assert.equal(transformer.next().value, 'e');
+		assert.equal(transformer.next().value, 'i');
+		assert.equal(transformer.next().value, 'o');
+		assert.equal(transformer.next().value, 'u');
+		assert.equal(transformer.next().value, 'y');
 		assert.equal(transformer.next().value, undefined);
 	});
 	it('`e`', () => {
 		const transformer = vowelReplace('e');
-		assert.equal(transformer.next().value, 'a');
-		assert.equal(transformer.next().value, 'y');
-		assert.equal(transformer.next().value, 'u');
-		assert.equal(transformer.next().value, 'o');
 		assert.equal(transformer.next().value, 'i');
+		assert.equal(transformer.next().value, 'o');
+		assert.equal(transformer.next().value, 'u');
+		assert.equal(transformer.next().value, 'y');
+		assert.equal(transformer.next().value, 'a');
 		assert.equal(transformer.next().value, undefined);
 	});
 	it('`aa`', () => {
 		const transformer = vowelReplace('aa');
-		assert.equal(transformer.next().value, 'ya');
-		assert.equal(transformer.next().value, 'yy');
-		assert.equal(transformer.next().value, 'yu');
-		assert.equal(transformer.next().value, 'yo');
-		assert.equal(transformer.next().value, 'yi');
-		assert.equal(transformer.next().value, 'ye');
+		assert.equal(transformer.next().value, 'ea');
+		assert.equal(transformer.next().value, 'ia');
+		assert.equal(transformer.next().value, 'oa');
 		assert.equal(transformer.next().value, 'ua');
-		assert.equal(transformer.next().value, 'uy');
-		assert.equal(transformer.next().value, 'uu');
-		assert.equal(transformer.next().value, 'uo');
-		assert.equal(transformer.next().value, 'ui');
+		assert.equal(transformer.next().value, 'ya');
+		assert.equal(transformer.next().value, 'ae');
+		assert.equal(transformer.next().value, 'ai');
+		assert.equal(transformer.next().value, 'ao');
+		assert.equal(transformer.next().value, 'au');
+		assert.equal(transformer.next().value, 'ay');
+		assert.equal(transformer.next().value, 'ee');
 	});
 	it('`shap`', () => {
 		const transformer = vowelReplace('shap');
-		assert.equal(transformer.next().value, 'shyp');
-		assert.equal(transformer.next().value, 'shup');
-		assert.equal(transformer.next().value, 'shop');
-		assert.equal(transformer.next().value, 'ship');
 		assert.equal(transformer.next().value, 'shep');
+		assert.equal(transformer.next().value, 'ship');
+		assert.equal(transformer.next().value, 'shop');
+		assert.equal(transformer.next().value, 'shup');
+		assert.equal(transformer.next().value, 'shyp');
 		assert.equal(transformer.next().value, undefined);
 	});
 	it('``', () => {
@@ -99,13 +99,13 @@ describe('addRepeats', () => {
 	it('`ab`', () => {
 		const transformer = addRepeats('ab');
 		assert.equal(transformer.next().value, 'aab');
+		assert.equal(transformer.next().value, 'abb');
 		assert.equal(transformer.next().value, 'aaab');
-		assert.equal(transformer.next().value, 'aaabb');
-		assert.equal(transformer.next().value, 'aaabbb');
+		assert.equal(transformer.next().value, 'abbb');
 		assert.equal(transformer.next().value, 'aabb');
 		assert.equal(transformer.next().value, 'aabbb');
-		assert.equal(transformer.next().value, 'abb');
-		assert.equal(transformer.next().value, 'abbb');
+		assert.equal(transformer.next().value, 'aaabb');
+		assert.equal(transformer.next().value, 'aaabbb');
 		assert.equal(transformer.next().value, undefined);
 	});
 	it('`aaa`', () => {
@@ -152,18 +152,18 @@ describe('eliminateRepeats', () => {
 		const transformer = eliminateRepeats('aaabbc');
 		assert.equal(transformer.next().value, 'aabbc');
 		assert.equal(transformer.next().value, 'abbc');
-		assert.equal(transformer.next().value, 'abc');
-		assert.equal(transformer.next().value, 'aabc');
 		assert.equal(transformer.next().value, 'aaabc');
+		assert.equal(transformer.next().value, 'aabc');
+		assert.equal(transformer.next().value, 'abc');
 		assert.equal(transformer.next().value, undefined);
 	});
 	it('`baaabbc`', () => {
 		const transformer = eliminateRepeats('baaabbc');
 		assert.equal(transformer.next().value, 'baabbc');
 		assert.equal(transformer.next().value, 'babbc');
-		assert.equal(transformer.next().value, 'babc');
-		assert.equal(transformer.next().value, 'baabc');
 		assert.equal(transformer.next().value, 'baaabc');
+		assert.equal(transformer.next().value, 'baabc');
+		assert.equal(transformer.next().value, 'babc');
 		assert.equal(transformer.next().value, undefined);
 	});
 	it('``', () => {

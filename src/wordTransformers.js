@@ -18,13 +18,13 @@ function createPrefixGenerator (transform) {
 	}
 
 	const gen = function* (value) {
-		const stack = [];
+		const queue = [];
 
-		stack.push([ '', value ]);
+		queue.push([ '', value ]);
 
-		while (stack.length)
+		while (queue.length)
 		{
-			let [ prefix, suffix ] = stack.pop();
+			let [ prefix, suffix ] = queue.shift();
 
 			// console.log(`prefix: ${prefix}, suffix: ${suffix}`);
 
@@ -51,7 +51,7 @@ function createPrefixGenerator (transform) {
 			suffix = suffix.substr(1);
 
 			if ( !wasEvaluated(prefix + char, suffix) ) {
-				stack.push([ prefix + char, suffix ]);
+				queue.push([ prefix + char, suffix ]);
 			}
 
 			const result = transform(prefix, suffix, char);
@@ -64,7 +64,7 @@ function createPrefixGenerator (transform) {
 			const [ p, s ] = result;
 
 			if ( !wasEvaluated(p, s) ) {
-				stack.push([ p, s ]);
+				queue.push([ p, s ]);
 			}
 		}
 	};
@@ -146,28 +146,32 @@ export function* vowelReplace (word) {
 	const yielded = {};
 
 	function wasEvaluated(prefix, suffix) {
-		return toKey(prefix, suffix) in evaluated;
+		const result = toKey(prefix, suffix) in evaluated;
+		// console.log(`Produced ${prefix}, ${suffix}. Evaluated: ${result}`);
+		return result;
+	}
+
+	function wasYielded(prefix, suffix) {
+		const result = prefix + suffix in yielded;
+		return result;
 	}
 
 	const gen = function* (value) {
-		const stack = [];
+		const queue = [];
 
-		stack.push([ '', value ]);
+		queue.push([ '', value ]);
 
-		while (stack.length)
+		while (queue.length)
 		{
-			let [ prefix, suffix ] = stack.pop();
-
-			if (toKey(prefix, suffix) in evaluated) {
+			let [ prefix, suffix ] = queue.shift();
+			if (wasEvaluated(prefix, suffix)) {
 				continue;
 			}
 
 			// Mark as evaluated to prevent duplicate recursion.
 			evaluated[toKey(prefix, suffix)] = true;
 
-			// If we haven't already produced this string(prefix + suffix),
-			// yield it, and mark as yielded.
-			if (!(prefix + suffix in yielded)) {
+			if (!wasYielded(prefix, suffix) && prefix + suffix !== value) {
 				yielded[prefix + suffix] = true;
 				yield prefix + suffix;
 			}
@@ -181,7 +185,7 @@ export function* vowelReplace (word) {
 			suffix = suffix.substr(1);
 
 			if ( !wasEvaluated(prefix + char, suffix) ) {
-				stack.push([ prefix + char, suffix ]);
+				queue.push([ prefix + char, suffix ]);
 			}
 
 			const index = vowels.indexOf(char);
@@ -190,17 +194,14 @@ export function* vowelReplace (word) {
 				let movingIndex = index;
 				while ((movingIndex = (movingIndex + 1) % vowels.length) > -1 && movingIndex !== index) {
 					if ( !wasEvaluated(prefix + vowels[movingIndex], suffix) ) {
-						stack.push([ prefix + vowels[movingIndex], suffix ]);
+						queue.push([ prefix + vowels[movingIndex], suffix ]);
 					}
 				}
 			}
 		}
 	};
-	
-	const generator = gen(word);
 
-	// The first result is the actual word itself, so we can skip.
-	generator.next();
+	const generator = gen(word);
 
 	yield* generator;
 }
