@@ -5,6 +5,8 @@ import {
     uppercaseChars
 } from '../wordTransformers';
 
+const maximumRepeats = 3;
+
 export default class SpellMangler {
     constructor(words) {
         this.words = {};
@@ -16,51 +18,44 @@ export default class SpellMangler {
 
     *mangle(word) {
         const yielded = {};
+		const evaluated = {};
+
+		function wasEvaluated(item) {
+			return item in evaluated;
+		}
+		function wasYielded(item) {
+			return item in yielded;
+		}
 
         function* gen(value) {
 
-            const stack = [];
+            const queue = [];
 
-            stack.push(value);
+            queue.push(value);
 
-            while (stack.length) {
+            while (queue.length) {
 
-                const item = stack.pop();
-				console.log(`item: ${item}`);
-                const transformers = [ uppercaseChars(item), vowelReplace(item), addRepeats(item) ];
+                const item = queue.shift();
+				evaluated[item] = true;
+
+                const transformers = [ uppercaseChars(item), vowelReplace(item), addRepeats(item, maximumRepeats) ];
                 for (let i = 0, length = transformers.length; i < length; i++) {
 
                     let next = null;
                     while ((next = transformers[i].next().value) && next !== undefined) {
-                        if (!(next in yielded)) {
+                        if (!wasYielded(next)) {
                             yielded[next] = true;
                             yield next;
                         }
-                        stack.push(next);
+						if (!wasEvaluated(next))
+						{
+							queue.push(next);
+						}
                     }
                 }
             }
         }
-            // 	function* recurse (value) {
-            //
-            // 		const transformers = [ uppercaseChars(value), vowelReplace(value), addRepeats(value) ];
-            //
-            // 		for (let i = 0, length = transformers.length; i < length; i++) {
-            // 			let next = null;
-            // 			while ((next = transformers[i].next().value) && next !== undefined) {
-            // 				if (!(next in yielded)) {
-            // 					yielded[next] = true;
-            // 					yield next;
-            // 				}
-            // 				yield* recurse(next);
-            // 			}
-            // 		}
-            //
-            // 		return;
-            // 	}
-            //
-            // 	yield* recurse(word);
-            // }
+
         const generator = gen(word);
 
         yield* generator;
