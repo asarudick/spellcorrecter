@@ -1,0 +1,47 @@
+{
+  "name": "spellcorrecter",
+  "version": "0.0.1",
+  "main": "",
+  "description": "Spellcheck yo'self before you spellwreck yo'self!",
+  "scripts": {
+    "test": "node ./node_modules/mocha/bin/mocha --compilers js:babel-core/register --require babel-polyfill ./tests",
+    "build": "node ./node_modules/gulp/bin/gulp.js build",
+    "start": "node ./dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asarudick/spellcorrecter.git"
+  },
+  "author": "Asa Rudick",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/asarudick/spellcorrecter/issues"
+  },
+  "homepage": "https://github.com/asarudick/spellcorrecter#readme",
+  "devDependencies": {
+    "babel": "latest",
+    "babel-core": "latest",
+    "babel-eslint": "latest",
+    "babel-plugin-syntax-async-functions": "latest",
+    "babel-plugin-syntax-async-generators": "latest",
+    "babel-plugin-transform-regenerator": "latest",
+    "babel-plugin-transform-runtime": "^6.7.5",
+    "babel-polyfill": "latest",
+    "babel-preset-es2015": "latest",
+    "babel-preset-stage-0": "latest",
+    "babel-register": "latest",
+    "chai": "^3.5.0",
+    "eslint": "latest",
+    "gulp": "latest",
+    "gulp-babel": "latest",
+    "gulp-eslint": "latest",
+    "gulp-mocha": "latest",
+    "gulp-notify": "latest",
+    "mocha": "^2.4.5"
+  },
+  "dependencies": {
+    "babel-runtime": "^6.6.1",
+    "commander": "^2.9.0",
+    "lodash": "^4.6.1"
+  }
+}
