@@ -150,20 +150,20 @@ describe('eliminateRepeats', () => {
 	});
 	it('`aaabbc`', () => {
 		const transformer = eliminateRepeats('aaabbc');
-		assert.equal(transformer.next().value, 'aaabc');
 		assert.equal(transformer.next().value, 'aabbc');
-		assert.equal(transformer.next().value, 'aabc');
 		assert.equal(transformer.next().value, 'abbc');
 		assert.equal(transformer.next().value, 'abc');
+		assert.equal(transformer.next().value, 'aabc');
+		assert.equal(transformer.next().value, 'aaabc');
 		assert.equal(transformer.next().value, undefined);
 	});
 	it('`baaabbc`', () => {
 		const transformer = eliminateRepeats('baaabbc');
-		assert.equal(transformer.next().value, 'baaabc');
 		assert.equal(transformer.next().value, 'baabbc');
-		assert.equal(transformer.next().value, 'baabc');
 		assert.equal(transformer.next().value, 'babbc');
 		assert.equal(transformer.next().value, 'babc');
+		assert.equal(transformer.next().value, 'baabc');
+		assert.equal(transformer.next().value, 'baaabc');
 		assert.equal(transformer.next().value, undefined);
 	});
 	it('``', () => {

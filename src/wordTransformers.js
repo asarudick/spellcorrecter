@@ -1,279 +1,171 @@
 
-const vowels = [ 'a', 'e', 'i', 'o', 'u', 'y' ];
+import _ from 'lodash';
 
-export function* uppercaseChars (word) {
-		// Prefix/suffix combination previously evaluated.
-		const evaluated = {};
+const vowels = 'aeiouy';
 
-		// Previously yielded prefix + suffix
-		const yielded = {};
+function toKey(a, b) { return a + ',' + b; }
 
+function createPrefixGenerator (transform) {
+
+	// Prefix/suffix combination previously evaluated.
+	const evaluated = {};
+
+	// Previously yielded prefix + suffix
+	const yielded = {};
+
+	function wasEvaluated(prefix, suffix) {
+		return toKey(prefix, suffix) in evaluated;
+	}
+
+	// Callbacks that are considered 'rules' to apply to each iteration.
+	const rules = Array.prototype.slice.call(arguments);
+
+	const gen = function* (value) {
 		const stack = [];
 
-		function toKey(a, b) { return a + ',' + b; }
-		//
-		// function* recurse (prefix, suffix) {
-		// 	if (toKey(prefix, suffix) in evaluated) {
-		// 		return;
-		// 	}
-		//
-		// 	// Mark as evaluated to prevent duplicate recursion.
-		// 	evaluated[toKey(prefix, suffix)] = true;
-		//
-		// 	// If we haven't already produced this string(prefix + suffix),
-		// 	// yield it, and mark as yielded.
-		// 	if (!(prefix + suffix in yielded)) {
-		// 		yielded[prefix + suffix] = true;
-		// 		yield prefix + suffix;
-		// 	}
-		//
-		// 	// If we have no suffix this call, then we are done.
-		// 	if (!suffix) {
-		// 		return;
-		// 	}
-		//
-		// 	const char = suffix[0];
-		// 	suffix = suffix.substr(1);
-		//
-		// 	if (!(toKey(prefix + char.toUpperCase(), suffix) in evaluated)) {
-		// 		yield* recurse(prefix + char.toUpperCase(), suffix);
-		// 	}
-		//
-		// 	if (!(toKey(prefix + char, suffix) in evaluated)) {
-		// 		yield* recurse(prefix + char, suffix);
-		// 	}
-		// }
+		stack.push([ '', value ]);
 
-		function* generate (value) {
+		while (stack.length)
+		{
+			let [ prefix, suffix ] = stack.pop();
 
-			stack.push([ '', value ]);
+			// console.log(`prefix: ${prefix}, suffix: ${suffix}`);
 
-			let prefix = null,
-				suffix = null;
+			if (toKey(prefix, suffix) in evaluated) {
+				continue;
+			}
 
-			while (stack.length)
+			// Mark as evaluated to prevent duplicate recursion.
+			evaluated[toKey(prefix, suffix)] = true;
+
+			// If we haven't already produced this string(prefix + suffix),
+			// yield it, and mark as yielded.
+			if (!(prefix + suffix in yielded)) {
+				yielded[prefix + suffix] = true;
+				yield prefix + suffix;
+			}
+
+			// If we have no suffix this call, then we are done.
+			if (!suffix) {
+				continue;
+			}
+
+			const char = suffix[0];
+			suffix = suffix.substr(1);
+
+			if ( !wasEvaluated(prefix + char, suffix) ) {
+				stack.push([ prefix + char, suffix ]);
+			}
+
+			const result = transform(prefix, suffix, char);
+
+			if (!result)
 			{
-				[ prefix, suffix ] = stack.pop();
+				continue;
+			}
 
-				if (toKey(prefix, suffix) in evaluated) {
-					continue;
-				}
+			const [ p, s ] = result;
 
-				// Mark as evaluated to prevent duplicate recursion.
-				evaluated[toKey(prefix, suffix)] = true;
-
-				// If we haven't already produced this string(prefix + suffix),
-				// yield it, and mark as yielded.
-				if (!(prefix + suffix in yielded)) {
-					yielded[prefix + suffix] = true;
-					yield prefix + suffix;
-				}
-
-				// If we have no suffix this call, then we are done.
-				if (!suffix) {
-					continue;
-				}
-
-				const char = suffix[0];
-				suffix = suffix.substr(1);
-
-				if (!(toKey(prefix + char.toUpperCase(), suffix) in evaluated)) {
-					stack.push([ prefix + char.toUpperCase(), suffix ]);
-				}
-
-				if (!(toKey(prefix + char, suffix) in evaluated)) {
-					stack.push([ prefix + char, suffix ]);
-				}
+			if ( !wasEvaluated(p, s) ) {
+				stack.push([ p, s ]);
 			}
 		}
+	};
 
-		const generator = generate('', word);
+	return gen;
+}
+export function* uppercaseChars (word) {
 
-		// The first result is the actual word itself, so we can skip.
-		generator.next();
+	const generator = createPrefixGenerator(
+		(prefix, suffix, char) => [ prefix + char.toUpperCase(), suffix ]
+	)(word);
 
-		yield* generator;
+	// The first result is the actual word itself, so we can skip.
+	generator.next();
+
+	yield* generator;
 }
 
 export function* lowercaseChars (word) {
-		// Prefix/suffix combination previously evaluated.
-		const evaluated = {};
 
-		// Previously yielded prefix + suffix
-		const yielded = {};
+	const generator = createPrefixGenerator(
+		(prefix, suffix, char) => [ prefix + char.toLowerCase(), suffix ]
+	)(word);
 
-		function toKey(a, b) { return a + ',' + b; }
+	// The first result is the actual word itself, so we can skip.
+	generator.next();
 
-		function* recurse (prefix, suffix) {
-			if (toKey(prefix, suffix) in evaluated) {
-				return;
-			}
-
-			// Mark as evaluated to prevent duplicate recursion.
-			evaluated[toKey(prefix, suffix)] = true;
-
-			// If we haven't already produced this string(prefix + suffix),
-			// yield it, and mark as yielded.
-			if (!(prefix + suffix in yielded)) {
-				yielded[prefix + suffix] = true;
-				yield prefix + suffix;
-			}
-
-			// If we have no suffix this call, then we are done.
-			if (!suffix) {
-				return;
-			}
-
-			const char = suffix[0];
-			suffix = suffix.substr(1);
-
-			if (!(toKey(prefix + char.toLowerCase(), suffix) in evaluated)) {
-				yield* recurse(prefix + char.toLowerCase(), suffix);
-			}
-
-			if (!(toKey(prefix + char, suffix) in evaluated)) {
-				yield* recurse(prefix + char, suffix);
-			}
-		}
-
-		const generator = recurse('', word);
-
-		// The first result is the actual word itself, so we can skip.
-		generator.next();
-
-		yield* generator;
+	yield* generator;
 }
 
 export function* addRepeats (word) {
-		// Prefix/suffix combination previously evaluated.
-		const evaluated = {};
 
-		// Previously yielded prefix + suffix
-		const yielded = {};
-
-		function toKey(a, b) { return a + ',' + b; }
-
-		function* recurse (prefix, suffix) {
-			if (toKey(prefix, suffix) in evaluated) {
-				return;
-			}
-			// Mark as evaluated to prevent duplicate recursion.
-			evaluated[toKey(prefix, suffix)] = true;
-
-			// If we haven't already produced this string(prefix + suffix),
-			// yield it, and mark as yielded.
-			if (!(prefix + suffix in yielded)) {
-				yielded[prefix + suffix] = true;
-				yield prefix + suffix;
-			}
-
-			// If we have no suffix this call, then we are done.
-			if (!suffix) {
-				return;
-			}
-
-			const char = suffix[0];
+	const generator = createPrefixGenerator(
+		(prefix, suffix, char) => {
 			const normalizedChar = char.toLowerCase();
 			const normalizedSuffix = suffix.toLowerCase();
 			const normalizedPrefix = prefix.toLowerCase();
-			const fullyRepeated = normalizedSuffix.length >= 3 && normalizedChar === normalizedSuffix[1] && normalizedChar === normalizedSuffix[2]
-						|| 	normalizedSuffix.length >= 2 && normalizedPrefix.length && normalizedPrefix[normalizedPrefix.length - 1] === normalizedChar && normalizedSuffix[1] === normalizedChar
-						|| 	normalizedPrefix.length >= 2 && normalizedPrefix[normalizedPrefix.length - 2] === normalizedChar && normalizedPrefix[normalizedPrefix.length - 1] === normalizedChar;
+			const fullyRepeated = normalizedSuffix.length >= 2 && normalizedChar === normalizedSuffix[0] && normalizedChar === normalizedSuffix[1]
+						|| normalizedSuffix.length >= 1 && normalizedPrefix.length && normalizedPrefix[normalizedPrefix.length - 1] === normalizedChar && normalizedSuffix[0] === normalizedChar
+						|| normalizedPrefix.length >= 2 && normalizedPrefix[normalizedPrefix.length - 2] === normalizedChar && normalizedPrefix[normalizedPrefix.length - 1] === normalizedChar
+						|| normalizedPrefix.length >= 3 && normalizedPrefix[normalizedPrefix.length - 3] === normalizedChar && normalizedPrefix[normalizedPrefix.length - 2] === normalizedChar && normalizedPrefix[normalizedPrefix.length - 1] === normalizedChar;
 
-			// If it hasn't already repeated 3 times, repeat it.
-			if (!fullyRepeated && !(toKey(prefix + char, suffix) in evaluated)) {
-				yield* recurse(prefix + char, suffix);
-			}
-
-			suffix = suffix.substr(1);
-			if (!(toKey(prefix + char, suffix) in evaluated)) {
-				yield* recurse(prefix + char, suffix);
+			if (!fullyRepeated)
+			{
+				return [ prefix + char, char + suffix ];
 			}
 		}
+	)(word);
 
-		const generator = recurse('', word);
+	// The first result is the actual word itself, so we can skip.
+	generator.next();
 
-		// The first result is the actual word itself, so we can skip.
-		generator.next();
-
-		yield* generator;
+	yield* generator;
 }
 
 export function* eliminateRepeats (word) {
-		// Prefix/suffix combination previously evaluated.
-		const evaluated = {};
 
-		// Previously yielded prefix + suffix
-		const yielded = {};
-
-		function toKey(a, b) { return a + ',' + b; }
-
-		function* recurse (prefix, suffix) {
-			if (toKey(prefix, suffix) in evaluated) {
-				return;
-			}
-
-			// Mark as evaluated to prevent duplicate recursion.
-			evaluated[toKey(prefix, suffix)] = true;
-
-			// If we haven't already produced this string(prefix + suffix),
-			// yield it, and mark as yielded.
-			if (!(prefix + suffix in yielded)) {
-				yielded[prefix + suffix] = true;
-				yield prefix + suffix;
-			}
-
-			// If we have no suffix this call, then we are done.
-			if (!suffix) {
-				return;
-			}
-
-			const char = suffix[0];
-			suffix = suffix.substr(1);
-
-			if (!(toKey(prefix + char, suffix) in evaluated)) {
-				yield* recurse(prefix + char, suffix);
-			}
-
-			if (prefix[prefix.length - 1] === char && !(toKey(prefix, suffix) in evaluated)) {
-				yield* recurse(prefix, suffix);
+	const generator = createPrefixGenerator(
+		(prefix, suffix, char) => {
+			if ( prefix[prefix.length - 1] === char)
+			{
+				return [ prefix, suffix ];
 			}
 		}
+	)(word);
 
-		const generator = recurse('', word);
+	// The first result is the actual word itself, so we can skip.
+	generator.next();
 
-		// The first result is the actual word itself, so we can skip.
-		generator.next();
-
-		yield* generator;
+	yield* generator;
 }
 
 export function* vowelReplace (word) {
-		function* recurse (prefix, suffix) {
-			if (!suffix) {
-				yield prefix;
-				return;
-			}
-
-			const char = suffix[0];
-			suffix = suffix.substr(1);
-
-			const index = vowels.indexOf(char);
-
-			yield* recurse(prefix + char, suffix);
-
-			if (index > -1) {
-				let movingIndex = index;
-				while ((movingIndex = (movingIndex + 1) % vowels.length) > -1 && movingIndex !== index) {
-					yield* recurse(prefix + vowels[movingIndex], suffix);
-				}
-			}
+	function* recurse (prefix, suffix) {
+		if (!suffix) {
+			yield prefix;
+			return;
 		}
 
-		const generator = recurse('', word);
+		const char = suffix[0];
+		suffix = suffix.substr(1);
 
-		// The first result is the actual word itself, so we can skip.
-		generator.next();
+		const index = vowels.indexOf(char);
 
-		yield* generator;
+		yield* recurse(prefix + char, suffix);
+
+		if (index > -1) {
+			let movingIndex = index;
+			while ((movingIndex = (movingIndex + 1) % vowels.length) > -1 && movingIndex !== index) {
+				yield* recurse(prefix + vowels[movingIndex], suffix);
+			}
+		}
+	}
+
+	const generator = recurse('', word);
+
+	// The first result is the actual word itself, so we can skip.
+	generator.next();
+
+	yield* generator;
 }
