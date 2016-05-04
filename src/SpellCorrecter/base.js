@@ -13,10 +13,13 @@ export default class SpellCorrecter {
 	correct (word) {
 
 		const evaluated = {};
+        const stack = [];
+		const words = this.words;
 
-		function recurse (value, words) {
+        stack.push(word);
 
-			evaluated[value] = true;
+		while (stack.length) {
+			const value = stack.pop();
 
 			const transformers = [ lowercaseChars(value), eliminateRepeats(value), vowelReplace(value) ];
 
@@ -28,23 +31,14 @@ export default class SpellCorrecter {
 						return next;
 					}
 
-					if (next in evaluated)
+					if (!(next in evaluated))
 					{
-						continue;
+						evaluated[next] = true;
+						stack.push(next);
 					}
 
-					const result = recurse(next, words);
-
-					if (result)
-					{
-						return result;
-					}
 				}
 			}
-
-			return;
 		}
-
-		return recurse(word, this.words);
 	}
 }

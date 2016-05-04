@@ -18,14 +18,15 @@ export default class SpellMangler {
 
     *mangle(word) {
         const yielded = {};
-		const evaluated = {};
+        const evaluated = {};
 
-		function wasEvaluated(item) {
-			return item in evaluated;
-		}
-		function wasYielded(item) {
-			return item in yielded;
-		}
+        function wasEvaluated(item) {
+            return item in evaluated;
+        }
+
+        function wasYielded(item) {
+            return item in yielded;
+        }
 
         function* gen(value) {
 
@@ -36,7 +37,7 @@ export default class SpellMangler {
             while (queue.length) {
 
                 const item = queue.shift();
-				evaluated[item] = true;
+                evaluated[item] = true;
 
                 const transformers = [ uppercaseChars(item), vowelReplace(item), addRepeats(item, maximumRepeats) ];
                 for (let i = 0, length = transformers.length; i < length; i++) {
@@ -47,10 +48,9 @@ export default class SpellMangler {
                             yielded[next] = true;
                             yield next;
                         }
-						if (!wasEvaluated(next))
-						{
-							queue.push(next);
-						}
+                        if (!wasEvaluated(next)) {
+                            queue.push(next);
+                        }
                     }
                 }
             }

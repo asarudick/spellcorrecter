@@ -24,6 +24,14 @@ function readLines (path) {
 }
 let words, mangler;
 
+function sleep (milliseconds) {
+	return new Promise((resolve, reject) => {
+		setTimeout(() => {
+			resolve();
+		}, milliseconds);
+	});
+}
+
 commander
 	.version('0.0.1')
 	.usage('<path>')
@@ -34,17 +42,24 @@ commander
 		try {
 			words = await readLines(path);
 			mangler = new SpellMangler();
-			_.each(words, (word) => {
+
+			for (let i = 0, length = words.length; i < length; i++) {
 				let value = null;
-				const gen = mangler.mangle(word);
+				const gen = mangler.mangle(words[i]);
 				while ((value = gen.next().value) && value !== undefined)
 				{
-					console.log(value);
-
+					process.stdout.write(value + '\n');
+					await sleep(200);
 				}
-			});
+			}
 		} catch (e) {
-			console.log(e.message);
+			process.stdout.write(e.message + '\n');
 		}
 	})
 	.parse(process.argv);
+
+
+
+process.on('SIGINT', () => {
+	process.exit(0);
+});
