@@ -26,8 +26,6 @@ function createPrefixGenerator (transform) {
 		{
 			let [ prefix, suffix ] = queue.shift();
 
-			// console.log(`prefix: ${prefix}, suffix: ${suffix}`);
-
 			if (toKey(prefix, suffix) in evaluated) {
 				continue;
 			}

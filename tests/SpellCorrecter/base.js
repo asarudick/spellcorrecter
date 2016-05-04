@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import SpellCorrecter from '../src/SpellCorrecter/base';
+import SpellCorrecter from '../../src/SpellCorrecter/base';
 import { describe, it } from 'mocha';
 import { assert, expect } from 'chai';
 

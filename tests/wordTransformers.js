@@ -23,6 +23,7 @@ describe('lowercaseChars', () => {
 		assert.equal(transformer.next().value, undefined);
 	});
 });
+
 describe('uppercaseChars', () => {
 	it('`a`', () => {
 		const transformer = uppercaseChars('a');
@@ -89,6 +90,7 @@ describe('vowelReplace', () => {
 		assert.equal(transformer.next().value, undefined);
 	});
 });
+
 describe('addRepeats', () => {
 	const maximum = 3;
 	it('`a`', () => {
@@ -122,6 +124,7 @@ describe('addRepeats', () => {
 		assert.equal(transformer.next().value, undefined);
 	});
 });
+
 describe('eliminateRepeats', () => {
 	it('`aa`', () => {
 		const transformer = eliminateRepeats('aa');

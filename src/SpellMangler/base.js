@@ -9,11 +9,6 @@ const maximumRepeats = 3;
 
 export default class SpellMangler {
     constructor(words) {
-        this.words = {};
-
-        _.each(words, (word) => {
-            this.words[word] = true;
-        });
     }
 
     *mangle(word) {
