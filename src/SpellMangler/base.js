@@ -1,55 +1,56 @@
-import _ from 'lodash';
-import {
-    vowelReplace,
-    addRepeats,
-    uppercaseChars
-} from '../wordTransformers';
+import { vowelReplace, addRepeats, uppercaseChars } from '../wordTransformers';
 
-const maximumRepeats = 3;
+const MAXIMUM_REPEATS = 3;
 
 export default class SpellMangler {
-    *mangle(word) {
-        const yielded = {};
-        const evaluated = {};
 
-        function wasEvaluated(item) {
-            return item in evaluated;
-        }
+	/**
+	 * Yields incorrect spellings of the given word by applying
+	 * uppercaseChars, addRepeats, and vowelReplace transforms.
+	 * @param  {string} word	The word to apply transforms upon.
+	 */
+	*mangle(word) {
 
-        function wasYielded(item) {
-            return item in yielded;
-        }
+		const yielded = {};
+		const queued = {};
+		const queue = [];
 
-        function* gen(value) {
+		function wasYielded(item) {
+			return item in yielded;
+		}
 
-            const queue = [];
+		/**
+		 * Queues a string if not already queued.
+		 * @param  {string} str The string to enqueue.
+		 */
+		function uniqueEnqueue(str) {
+			if (!(str in queued)) {
+				queued[str] = true;
+				queue.push(str);
+			}
+		}
 
-            queue.push(value);
+		// Kick start the process.
+		queue.push(word);
 
-            while (queue.length) {
+		while (queue.length) {
 
-                const item = queue.shift();
-                evaluated[item] = true;
+			const item = queue.shift();
 
-                const transformers = [ uppercaseChars(item), vowelReplace(item), addRepeats(item, maximumRepeats) ];
-                for (let i = 0, length = transformers.length; i < length; i++) {
+			const transformers = [ uppercaseChars(item), vowelReplace(item), addRepeats(item, MAXIMUM_REPEATS) ];
 
-                    let next = null;
-                    while ((next = transformers[i].next().value) && next !== undefined) {
-                        if (!wasYielded(next)) {
-                            yielded[next] = true;
-                            yield next;
-                        }
-                        if (!wasEvaluated(next)) {
-                            queue.push(next);
-                        }
-                    }
-                }
-            }
-        }
+			// For each transform, apply the transform until it can no longer provide unique variants.
+			for (let i = 0, length = transformers.length; i < length; i++) {
 
-        const generator = gen(word);
-
-        yield* generator;
-    }
+				let next = null;
+				while ((next = transformers[i].next().value) && next !== undefined) {
+					if (!wasYielded(next)) {
+						yielded[next] = true;
+						yield next;
+					}
+					uniqueEnqueue(next);
+				}
+			}
+		}
+	}
 }
