@@ -1,12 +1,8 @@
 import _ from 'lodash';
-import {
-	vowelReplace,
-	eliminateRepeats,
-	lowercaseChars
-} from '../wordTransformers';
+import { vowelReplace, eliminateRepeats, lowercaseChars } from '../wordTransformers';
 
 export default class SpellCorrecter {
-	constructor(words) {
+	constructor (words) {
 		this.words = {};
 
 		_.each(words, (word) => {
@@ -14,7 +10,7 @@ export default class SpellCorrecter {
 		});
 	}
 
-	correct(word) {
+	correct (word) {
 
 		if (!Object.keys(this.words).length)
 		{
