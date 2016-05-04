@@ -1,7 +1,6 @@
 import gulp from 'gulp';
 import babel from 'gulp-babel';
 import eslint from 'gulp-eslint';
-import notify from 'gulp-notify';
 import mocha from 'gulp-mocha';
 
 var filePath = {
@@ -31,8 +30,7 @@ gulp.task('build', () => {
 		.pipe(babel({
 			presets: [ 'es2015', 'stage-0' ]
 		}))
-		.pipe(gulp.dest('dist'))
-		.pipe(notify({ message: 'Project successfully built!', onLast: true } ));
+		.pipe(gulp.dest('dist'));
 });
 
 gulp.task('test', () => {
