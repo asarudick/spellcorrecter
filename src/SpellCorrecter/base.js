@@ -15,7 +15,10 @@ export default class SpellCorrecter {
     }
 
     correct(word) {
-
+		if (!Object.keys(this.words).length)
+		{
+			throw new Error('No words provided. Make sure to initialize the SpellCorrecter with words.');
+		}
         const evaluated = {};
         const stack = [];
         const words = this.words;
