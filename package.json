@@ -5,9 +5,9 @@
 	"description": "Spellcheck yo'self before you spellwreck yo'self!",
 	"scripts": {
 		"test": "node ./node_modules/mocha/bin/mocha --compilers js:babel-core/register --require babel-polyfill ./tests ./tests/**/*.js",
-		"build": "node ./node_modules/gulp/bin/gulp.js build",
-		"start": "node ./dist/SpellCorrecter/index.js ./tests/words.txt",
-		"pipetest": "node ./dist/SpellMangler/index.js ./tests/words.txt | node ./dist/SpellCorrecter/index.js ./tests/words.txt"
+		"build": "node ./node_modules/gulp/bin/gulp build",
+		"start": "node ./dist/SpellCorrecter/index ./tests/words.txt",
+		"pipetest": "node ./dist/SpellMangler/index ./tests/words.txt | node ./dist/SpellCorrecter/index ./tests/words.txt"
 	},
 	"repository": {
 		"type": "git",
