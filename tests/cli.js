@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import Cli, { CliError } from '../src/Cli';
+import Cli, { CliError } from '../src/cli';
 import { describe, it } from 'mocha';
 import { assert, expect } from 'chai';
 import { PassThrough } from 'stream';
