@@ -6,6 +6,7 @@
   "scripts": {
     "test": "node ./node_modules/mocha/bin/mocha --compilers js:babel-core/register --require babel-polyfill ./tests ./tests/**/*.js",
     "build": "node ./node_modules/gulp/bin/gulp.js build",
+	"start": "node ./dist/index.js",
     "start": "node ./dist/index.js"
   },
   "repository": {
@@ -19,6 +20,16 @@
   },
   "homepage": "https://github.com/asarudick/spellcorrecter#readme",
   "devDependencies": {
+    "chai": "^3.5.0",
+    "eslint": "latest",
+    "gulp": "latest",
+    "gulp-babel": "latest",
+    "gulp-eslint": "latest",
+    "gulp-mocha": "latest",
+    "gulp-notify": "latest",
+    "mocha": "^2.4.5"
+  },
+  "dependencies": {
     "babel": "latest",
     "babel-core": "latest",
     "babel-eslint": "latest",
@@ -30,16 +41,6 @@
     "babel-preset-es2015": "latest",
     "babel-preset-stage-0": "latest",
     "babel-register": "latest",
-    "chai": "^3.5.0",
-    "eslint": "latest",
-    "gulp": "latest",
-    "gulp-babel": "latest",
-    "gulp-eslint": "latest",
-    "gulp-mocha": "latest",
-    "gulp-notify": "latest",
-    "mocha": "^2.4.5"
-  },
-  "dependencies": {
     "babel-runtime": "^6.6.1",
     "commander": "^2.9.0",
     "lodash": "^4.6.1"
