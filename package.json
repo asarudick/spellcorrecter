@@ -4,6 +4,7 @@
 	"main": "",
 	"description": "Spellcheck yo'self before you spellwreck yo'self!",
 	"scripts": {
+		"lint": "node ./node_modules/eslint/bin/eslint ./src ./tests",
 		"test": "node ./node_modules/mocha/bin/mocha --compilers js:babel-core/register --require babel-polyfill ./tests ./tests/**/*.js",
 		"build": "node ./node_modules/gulp/bin/gulp build",
 		"start": "node ./dist/SpellCorrecter/index ./tests/words.txt",
