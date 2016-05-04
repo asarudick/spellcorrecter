@@ -8,9 +8,6 @@ import {
 const maximumRepeats = 3;
 
 export default class SpellMangler {
-    constructor(words) {
-    }
-
     *mangle(word) {
         const yielded = {};
         const evaluated = {};

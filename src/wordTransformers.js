@@ -1,37 +1,55 @@
-
 import _ from 'lodash';
 
+// Vowels of the English language.
 const vowels = 'aeiouy';
 
 function toKey(a, b) { return a + ',' + b; }
 
+/**
+ * Returns a prefix generator (analogous to those recursive permutation
+ * functions you learned in CS 3xx/4xx) that accepts a callback that itself
+ * returns null, or a one-off transformation of the provided prefix, suffix, and
+ * character in the form of [ prefix, suffix ]. Each produced generator comes
+ * with 2 forms of memoization. One to reduce the number of queue pushes by
+ * ensuring queue pushes are unique, and the other ensures that the yielded
+ * results are unique.
+ * @param  {Function} transform The one-off transform to apply to the current
+ *                              iteration.
+ * @return {Generator Function}	The prefix generator itself.
+ */
 function createPrefixGenerator (transform) {
 
 	// Prefix/suffix combination previously evaluated.
-	const evaluated = {};
+	const queued = {};
 
 	// Previously yielded prefix + suffix
 	const yielded = {};
+	const queue = [];
 
-	function wasEvaluated(prefix, suffix) {
-		return toKey(prefix, suffix) in evaluated;
+	/**
+	 * Queues a prefix and suffix if not already queued.
+	 * @param  {string} prefix The prefix to enqueue.
+	 * @param  {string} suffix The suffix to enqueue.
+	 */
+	function uniqueEnqueue(prefix, suffix) {
+		if ( !(toKey(prefix, suffix) in queued) ) {
+			queued[toKey(prefix, suffix)] = true;
+			queue.push([ prefix, suffix ]);
+		}
 	}
 
-	const gen = function* (value) {
-		const queue = [];
+	/**
+	 * Iteratively yields each possible variant according to the transformation
+	 * given. (Vague wording intentional. See usage in transformations below.)
+	 * @param  {string} word	The word to apply transformations to.
+	 */
+	const gen = function* (word) {
 
-		queue.push([ '', value ]);
+		queue.push([ '', word ]);
 
 		while (queue.length)
 		{
 			let [ prefix, suffix ] = queue.shift();
-
-			if (toKey(prefix, suffix) in evaluated) {
-				continue;
-			}
-
-			// Mark as evaluated to prevent duplicate recursion.
-			evaluated[toKey(prefix, suffix)] = true;
 
 			// If we haven't already produced this string(prefix + suffix),
 			// yield it, and mark as yielded.
@@ -48,9 +66,7 @@ function createPrefixGenerator (transform) {
 			const char = suffix[0];
 			suffix = suffix.substr(1);
 
-			if ( !wasEvaluated(prefix + char, suffix) ) {
-				queue.push([ prefix + char, suffix ]);
-			}
+			uniqueEnqueue( prefix + char, suffix );
 
 			const result = transform(prefix, suffix, char);
 
@@ -61,14 +77,17 @@ function createPrefixGenerator (transform) {
 
 			const [ p, s ] = result;
 
-			if ( !wasEvaluated(p, s) ) {
-				queue.push([ p, s ]);
-			}
+			uniqueEnqueue( p, s );
 		}
 	};
 
 	return gen;
 }
+
+/**
+ * Yields each possible uppercase variant of given word.
+ * @param  {string} word The word to apply uppercasing to.
+ */
 export function* uppercaseChars (word) {
 
 	const generator = createPrefixGenerator(
@@ -81,6 +100,10 @@ export function* uppercaseChars (word) {
 	yield* generator;
 }
 
+/**
+ * Yields each possible lowercase variant of given word.
+ * @param  {string} word The word to apply lowercasing to.
+ */
 export function* lowercaseChars (word) {
 
 	const generator = createPrefixGenerator(
@@ -93,6 +116,13 @@ export function* lowercaseChars (word) {
 	yield* generator;
 }
 
+
+/**
+ * Yields each possible repeated character variant of given word.
+ * @param  {string} word 	The word to apply transform to.
+ * @param  {int} 	maximum The maximum contiguous repetition of a single
+ *                        	character.
+ */
 export function* addRepeats (word, maximum) {
 
 	function isFullyRepeated(prefix, suffix, char) {
@@ -122,6 +152,10 @@ export function* addRepeats (word, maximum) {
 	yield* generator;
 }
 
+/**
+ * Yields each possible eliminated repeated character variant of given word.
+ * @param  {string} word 	The word to apply transform to.
+ */
 export function* eliminateRepeats (word) {
 
 	const generator = createPrefixGenerator(
@@ -139,26 +173,38 @@ export function* eliminateRepeats (word) {
 	yield* generator;
 }
 
+
+/**
+ * Yields each possible replaced vowel variant of given word.
+ * @param  {string} word 	The word to apply transform to.
+ */
 export function* vowelReplace (word) {
 
+	const queue = [];
+
 	// Prefix/suffix combination previously evaluated.
-	const evaluated = {};
+	const queued = {};
 
 	// Previously yielded prefix + suffix
 	const yielded = {};
 
-	function wasEvaluated(prefix, suffix) {
-		const result = toKey(prefix, suffix) in evaluated;
-		return result;
+	function wasYielded(prefix, suffix) {
+		return prefix + suffix in yielded;
 	}
 
-	function wasYielded(prefix, suffix) {
-		const result = prefix + suffix in yielded;
-		return result;
+	/**
+	 * Queues a prefix and suffix if not already queued.
+	 * @param  {string} prefix The prefix to enqueue.
+	 * @param  {string} suffix The suffix to enqueue.
+	 */
+	function uniqueEnqueue(prefix, suffix) {
+		if ( !(toKey(prefix, suffix) in queued) ) {
+			queued[toKey(prefix, suffix)] = true;
+			queue.push([ prefix, suffix ]);
+		}
 	}
 
 	const gen = function* (value) {
-		const queue = [];
 
 		queue.push([ '', value ]);
 
@@ -166,13 +212,7 @@ export function* vowelReplace (word) {
 		{
 			let [ prefix, suffix ] = queue.shift();
 
-			if (wasEvaluated(prefix, suffix)) {
-				continue;
-			}
-
-			// Mark as evaluated to prevent duplicate recursion.
-			evaluated[toKey(prefix, suffix)] = true;
-
+			// Ensure we have something unique. If so, yield it.
 			if (!wasYielded(prefix, suffix) && prefix + suffix !== value) {
 				yielded[prefix + suffix] = true;
 				yield prefix + suffix;
@@ -183,21 +223,21 @@ export function* vowelReplace (word) {
 				continue;
 			}
 
+			// Chop off the first character of suffix;
 			const char = suffix[0];
 			suffix = suffix.substr(1);
 
-			if ( !wasEvaluated(prefix + char, suffix) ) {
-				queue.push([ prefix + char, suffix ]);
-			}
+			// Enqueue the same word, with current character as end of prefix.
+			uniqueEnqueue(prefix + char, suffix);
 
 			const index = vowels.indexOf(char);
 
+			// Rotate through the vowels starting at the next, and ending
+			// at the previous, enqueuing each variant.
 			if (index > -1) {
 				let movingIndex = index;
 				while ((movingIndex = (movingIndex + 1) % vowels.length) > -1 && movingIndex !== index) {
-					if ( !wasEvaluated(prefix + vowels[movingIndex], suffix) ) {
-						queue.push([ prefix + vowels[movingIndex], suffix ]);
-					}
+					uniqueEnqueue(prefix + vowels[movingIndex], suffix);
 				}
 			}
 		}
