@@ -17,7 +17,7 @@ export default class SpellCorrecter {
 			throw new Error('No words provided. Make sure to initialize the SpellCorrecter with words.');
 		}
 
-		const evaluated = {};
+		const pushed = {};
 		const stack = [];
 		const words = this.words;
 
@@ -35,11 +35,10 @@ export default class SpellCorrecter {
 						return next;
 					}
 
-					if (!(next in evaluated)) {
-						evaluated[next] = true;
+					if (!(next in pushed)) {
+						pushed[next] = true;
 						stack.push(next);
 					}
-
 				}
 			}
 		}
