@@ -19,9 +19,6 @@ function toKey(a, b) { return a + ',' + b; }
  */
 function createPrefixGenerator (transform) {
 
-	// Prefix/suffix combination previously evaluated.
-	const queued = {};
-
 	// Previously yielded prefix + suffix
 	const yielded = {};
 	const queue = [];
@@ -31,11 +28,12 @@ function createPrefixGenerator (transform) {
 	 * @param  {string} prefix The prefix to enqueue.
 	 * @param  {string} suffix The suffix to enqueue.
 	 */
-	function uniqueEnqueue(prefix, suffix) {
-		if ( !(toKey(prefix, suffix) in queued) ) {
-			queued[toKey(prefix, suffix)] = true;
-			queue.push([ prefix, suffix ]);
+	function enqueue(prefix, suffix) {
+		if (!suffix)
+		{
+			return;
 		}
+		queue.push([ prefix, suffix ]);
 	}
 
 	/**
@@ -62,7 +60,7 @@ function createPrefixGenerator (transform) {
 			// This combination needs no yielding, as it has already been
 			// yielded right after being put into the queue, or
 			// it is equal to the word.
-			uniqueEnqueue( prefix + char, suffix );
+			enqueue( prefix + char, suffix );
 
 			const result = transform(prefix, suffix, char);
 
@@ -73,7 +71,7 @@ function createPrefixGenerator (transform) {
 
 			const [ p, s ] = result;
 
-			uniqueEnqueue( p, s );
+			enqueue( p, s );
 
 			// If we haven't already produced this string(prefix + suffix),
 			// yield it, and mark as yielded.
@@ -173,19 +171,17 @@ export function* vowelReplace (word) {
 
 	const queue = [];
 
-	// Prefix/suffix combination previously evaluated.
-	const queued = {};
-
 	/**
 	 * Queues a prefix and suffix if not already queued.
 	 * @param  {string} prefix The prefix to enqueue.
 	 * @param  {string} suffix The suffix to enqueue.
 	 */
-	function uniqueEnqueue(prefix, suffix) {
-		if ( !(toKey(prefix, suffix) in queued) ) {
-			queued[toKey(prefix, suffix)] = true;
-			queue.push([ prefix, suffix ]);
+	function enqueue(prefix, suffix) {
+		if (!suffix)
+		{
+			return;
 		}
+		queue.push([ prefix, suffix ]);
 	}
 
 	const gen = function* (value) {
@@ -196,17 +192,12 @@ export function* vowelReplace (word) {
 		{
 			let [ prefix, suffix ] = queue.shift();
 
-			// If we have no suffix this call, then we are done.
-			if (!suffix) {
-				continue;
-			}
-
 			// Chop off the first character of suffix;
 			const char = suffix[0];
 			suffix = suffix.substr(1);
 
 			// Enqueue the same word, with current character as end of prefix.
-			uniqueEnqueue(prefix + char, suffix);
+			enqueue(prefix + char, suffix);
 
 			const index = vowels.indexOf(char);
 
@@ -215,7 +206,7 @@ export function* vowelReplace (word) {
 			if (index > -1) {
 				let movingIndex = index;
 				while ((movingIndex = (movingIndex + 1) % vowels.length) > -1 && movingIndex !== index) {
-					uniqueEnqueue(prefix + vowels[movingIndex], suffix);
+					enqueue(prefix + vowels[movingIndex], suffix);
 					yield prefix + vowels[movingIndex] + suffix;
 				}
 			}
