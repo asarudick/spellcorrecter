@@ -51,13 +51,6 @@ function createPrefixGenerator (transform) {
 		{
 			let [ prefix, suffix ] = queue.shift();
 
-			// If we haven't already produced this string(prefix + suffix),
-			// yield it, and mark as yielded.
-			if (!(prefix + suffix in yielded)) {
-				yielded[prefix + suffix] = true;
-				yield prefix + suffix;
-			}
-
 			// If we have no suffix this call, then we are done.
 			if (!suffix) {
 				continue;
@@ -66,6 +59,9 @@ function createPrefixGenerator (transform) {
 			const char = suffix[0];
 			suffix = suffix.substr(1);
 
+			// This combination needs no yielding, as it has already been
+			// yielded right after being put into the queue, or
+			// it is equal to the word.
 			uniqueEnqueue( prefix + char, suffix );
 
 			const result = transform(prefix, suffix, char);
@@ -78,6 +74,13 @@ function createPrefixGenerator (transform) {
 			const [ p, s ] = result;
 
 			uniqueEnqueue( p, s );
+
+			// If we haven't already produced this string(prefix + suffix),
+			// yield it, and mark as yielded.
+			if (!(p + s in yielded)) {
+				yielded[p + s] = true;
+				yield p + s;
+			}
 		}
 	};
 
@@ -94,9 +97,6 @@ export function* uppercaseChars (word) {
 		(prefix, suffix, char) => [ prefix + char.toUpperCase(), suffix ]
 	)(word);
 
-	// The first result is the actual word itself, so we can skip.
-	generator.next();
-
 	yield* generator;
 }
 
@@ -109,9 +109,6 @@ export function* lowercaseChars (word) {
 	const generator = createPrefixGenerator(
 		(prefix, suffix, char) => [ prefix + char.toLowerCase(), suffix ]
 	)(word);
-
-	// The first result is the actual word itself, so we can skip.
-	generator.next();
 
 	yield* generator;
 }
@@ -146,9 +143,6 @@ export function* addRepeats (word, maximum) {
 		}
 	)(word);
 
-	// The first result is the actual word itself, so we can skip.
-	generator.next();
-
 	yield* generator;
 }
 
@@ -167,9 +161,6 @@ export function* eliminateRepeats (word) {
 		}
 	)(word);
 
-	// The first result is the actual word itself, so we can skip.
-	generator.next();
-
 	yield* generator;
 }
 
@@ -184,13 +175,6 @@ export function* vowelReplace (word) {
 
 	// Prefix/suffix combination previously evaluated.
 	const queued = {};
-
-	// Previously yielded prefix + suffix
-	const yielded = {};
-
-	function wasYielded(prefix, suffix) {
-		return prefix + suffix in yielded;
-	}
 
 	/**
 	 * Queues a prefix and suffix if not already queued.
@@ -212,12 +196,6 @@ export function* vowelReplace (word) {
 		{
 			let [ prefix, suffix ] = queue.shift();
 
-			// Ensure we have something unique. If so, yield it.
-			if (!wasYielded(prefix, suffix) && prefix + suffix !== value) {
-				yielded[prefix + suffix] = true;
-				yield prefix + suffix;
-			}
-
 			// If we have no suffix this call, then we are done.
 			if (!suffix) {
 				continue;
@@ -238,6 +216,7 @@ export function* vowelReplace (word) {
 				let movingIndex = index;
 				while ((movingIndex = (movingIndex + 1) % vowels.length) > -1 && movingIndex !== index) {
 					uniqueEnqueue(prefix + vowels[movingIndex], suffix);
+					yield prefix + vowels[movingIndex] + suffix;
 				}
 			}
 		}
