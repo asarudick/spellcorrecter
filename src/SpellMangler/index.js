@@ -36,9 +36,6 @@ function sleep (milliseconds) {
 	});
 }
 
-
-
-
 async function init () {
 	let filePath;
 	commander
@@ -46,7 +43,7 @@ async function init () {
 		.usage('<path to words file>')
 		.description('An unnnhalpppfol epp firrr curracteng yoour atricyous spellleng.')
 		.arguments('<path>')
-		.option('-d, --delay <duration>', 'Interval at which to yield results')
+		.option('-d, --delay <duration>', 'Interval at which to yield misspelled words')
 		.action((path) => {
 			try {
 				filePath = path;
