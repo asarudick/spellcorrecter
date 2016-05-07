@@ -10,8 +10,7 @@ function toKey(a, b) { return a + ',' + b; }
  * functions you learned in CS 3xx/4xx) that accepts a callback that itself
  * returns null, or a one-off transformation of the provided prefix, suffix, and
  * character in the form of [ prefix, suffix ]. Each produced generator comes
- * with 2 forms of memoization. One to reduce the number of queue pushes by
- * ensuring queue pushes are unique, and the other ensures that the yielded
+ * with 1 form of memoization to ensure that the yielded
  * results are unique.
  * @param  {Function} transform The one-off transform to apply to the current
  *                              iteration.
